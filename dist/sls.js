@@ -13,7 +13,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 // Base on: https://github.com/aliyun/aliyun-log-grafana-datasource-plugin/blob/master/src/sls.js
 
 // Taken from google closure library
-function stringToUtf8ByteArray(s) {
+function stringToUtf8ByteArray(str) {
   // TODO(user): Use native implementations if/when available
   var out = [],
       p = 0;
@@ -144,7 +144,7 @@ var SLS = exports.SLS = function () {
       var bodyStr = this.serializeBody(body, function (v) {
         return v;
       });
-      var payload = [requestMethod, '\n\n\n', logHeaders['x-sls-date'], '\n', 'x-log-apiversion:' + logHeaders['x-log-apiversion'], '\n', 'x-log-body-rawsize:' + logHeaders['x-log-bodyrawsize'], 'x-log-signaturemethod:' + logHeaders['x-log-signaturemethod'], '\n', url + '?' + bodyStr].join('');
+      var payload = [requestMethod, '\n\n\n', logHeaders['x-sls-date'], '\n', 'x-log-apiversion:' + logHeaders['x-log-apiversion'], '\n', 'x-log-bodyrawsize:' + logHeaders['x-log-bodyrawsize'], '\n', 'x-log-signaturemethod:' + logHeaders['x-log-signaturemethod'], '\n', url + '?' + bodyStr].join('');
 
       return b64HMACSHA12Sign(this.config.accessKeySecret, payload);
     }
@@ -153,18 +153,40 @@ var SLS = exports.SLS = function () {
     value: function serializeBody(body, valueEncodeFn) {
       var parts = [];
 
-      for (var k in body) {
-        if (k === 'protobuf') {
-          continue;
-        }
-        if (k === 'Project') {
-          if (body.APIVersion && body.APIVersion >= '0.3.0') {
+      var keys = Object.keys(body).sort();
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = keys[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var k = _step.value;
+
+          if (k === 'protobuf') {
             continue;
           }
-        }
+          if (k === 'Project') {
+            if (body.APIVersion && body.APIVersion >= '0.3.0') {
+              continue;
+            }
+          }
 
-        var value = body[k];
-        parts.push(k + '=' + valueEncodeFn(value));
+          var value = body[k];
+          parts.push(k + '=' + valueEncodeFn(value));
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
       }
 
       return parts.join('&');
@@ -172,7 +194,7 @@ var SLS = exports.SLS = function () {
   }, {
     key: 'encodeBody',
     value: function encodeBody(body) {
-      return serializeBody(body, encodeURIComponent);
+      return this.serializeBody(body, encodeURIComponent);
     }
   }, {
     key: 'requestData',
@@ -186,15 +208,15 @@ var SLS = exports.SLS = function () {
         headers: Object.assign(headers, logHeaders, {
           Authorization: 'LOG ' + this.config.accessKeyId + ':' + requestSignature
         }),
-        url: '' + this.baseUrl + url + '?' + encodeBody(body)
+        url: '' + this.baseUrl + url + '?' + this.encodeBody(body)
       };
 
       return this.backendSrv.datasourceRequest(requestOptions);
     }
   }, {
-    key: 'GetData',
-    value: function GetData(ProjectName, logstore, body) {
-      return this.requestData('GET', '/logstores/' + logstore + '/index', {}, Object.assign(opt, { type: 'log' }));
+    key: 'getData',
+    value: function getData(logstore, body) {
+      return this.requestData('GET', '/logstores/' + logstore + '/index', {}, Object.assign(body, { type: 'log' }));
     }
   }]);
 

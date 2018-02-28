@@ -9,15 +9,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var _require = require('./datasource.js'),
     Datasource = _require.Datasource;
 
+var _require2 = require('./query_ctrl.js'),
+    QueryCtrl = _require2.QueryCtrl;
+
 var ConfigCtrl = function ConfigCtrl() {
   _classCallCheck(this, ConfigCtrl);
 };
 
 ConfigCtrl.templateUrl = 'partials/config.html';
-
-var QueryCtrl = function QueryCtrl() {
-  _classCallCheck(this, QueryCtrl);
-};
 
 var QueryOptionsCtrl = function QueryOptionsCtrl() {
   _classCallCheck(this, QueryOptionsCtrl);
