@@ -1,0 +1,24 @@
+version: '2'
+services:
+  grafana-storage:
+    container_name: grafana-storage
+    build:
+      context: ./
+      dockerfile: grafana-storage.dockerfile
+  grafana:
+    container_name: grafana
+    build:
+      context: ./
+      dockerfile: grafana.dockerfile
+    volumes:
+      - '../dist:/var/lib/grafana/plugins/aliyun-sls-grafana-plugin/dist'
+    volumes_from:
+      - grafana-storage
+    environment:
+      - GF_SERVER_ROOT_URL=http://127.0.0.1:13551
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    ports:
+      - "13551:3000"
+    entrypoint:
+      - sleep
+      - infinity

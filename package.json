@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build:src": "babel src -d dist",
-    "build": "npm run build:src",
+    "build:plugin": "cp src/plugin.json dist/plugin.json",
+    "build": "npm run build:src && npm run build:plugin",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "hbc <me@hbc.rocks>",
