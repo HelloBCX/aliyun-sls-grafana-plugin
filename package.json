@@ -6,12 +6,15 @@
   "scripts": {
     "build:src": "babel src -d dist",
     "build:plugin": "cp src/plugin.json dist/plugin.json",
-    "build": "npm run build:src && npm run build:plugin",
+    "build:partials": "rm -rf dist/partials && cp -r src/partials dist/partials",
+    "build": "npm run build:src && npm run build:plugin && npm run build:partials",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "hbc <me@hbc.rocks>",
   "license": "MIT",
   "devDependencies": {
-    "babel-cli": "^6.26.0"
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-es2015-for-of": "^6.23.0",
+    "babel-preset-es2015": "^6.24.1"
   }
 }
