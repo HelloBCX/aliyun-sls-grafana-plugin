@@ -3,7 +3,7 @@
 // Base on: https://github.com/aliyun/aliyun-log-grafana-datasource-plugin/blob/master/src/sls.js
 
 // Taken from google closure library
-function stringToUtf8ByteArray(s) {
+function stringToUtf8ByteArray(str) {
   // TODO(user): Use native implementations if/when available
   var out = [], p = 0;
   for (var i = 0; i < str.length; i++) {
@@ -79,7 +79,8 @@ export class SLS {
       '\n',
       `x-log-apiversion:${logHeaders['x-log-apiversion']}`,
       `\n`,
-      `x-log-body-rawsize:${logHeaders['x-log-bodyrawsize']}`,
+      `x-log-bodyrawsize:${logHeaders['x-log-bodyrawsize']}`,
+      `\n`,
       `x-log-signaturemethod:${logHeaders['x-log-signaturemethod']}`,
       '\n',
       `${url}?${bodyStr}`,
@@ -91,7 +92,8 @@ export class SLS {
   serializeBody(body, valueEncodeFn) {
     const parts = [];
 
-    for (let k in body) {
+    const keys = Object.keys(body).sort();
+    for (let k of keys) {
       if (k === 'protobuf') {
         continue;
       }
@@ -109,7 +111,7 @@ export class SLS {
   }
 
   encodeBody(body) {
-    return serializeBody(body, encodeURIComponent);
+    return this.serializeBody(body, encodeURIComponent);
   }
 
   requestData(method, url, headers, body) {
@@ -131,19 +133,19 @@ export class SLS {
           Authorization: `LOG ${this.config.accessKeyId}:${requestSignature}`,
         }
       ),
-      url: `${this.baseUrl}${url}?${encodeBody(body)}`
+      url: `${this.baseUrl}${url}?${this.encodeBody(body)}`
     };
 
     return this.backendSrv.datasourceRequest(requestOptions);
   }
 
-  GetData(ProjectName, logstore, body) {
+  getData(logstore, body) {
     return this.requestData(
       'GET',
       `/logstores/${logstore}/index`,
       {},
       Object.assign(
-        opt,
+        body,
         { type: 'log' }
       )
     )
